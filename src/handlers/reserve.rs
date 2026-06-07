@@ -153,7 +153,7 @@ pub async fn create_reservation(
             debug!("创建预约成功：{}", reservation_id);
             StatusHeaderResponse::Success(
                 StatusCode::CREATED,
-                format!("Location: /reservations/{}", reservation_id),
+                format!("/reservations/{}", reservation_id),
             )
         }
         Err(e) => {

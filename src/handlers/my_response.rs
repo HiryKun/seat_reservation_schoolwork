@@ -1,6 +1,6 @@
 use axum::{
     Json,
-    http::StatusCode,
+    http::{StatusCode, header},
     response::{IntoResponse, Response},
 };
 
@@ -21,18 +21,19 @@ where
     }
 }
 
-pub enum StatusHeaderResponse<T> {
-    Success(StatusCode, T),
+pub enum StatusHeaderResponse {
+    // 成功时：只需传入状态码，和跳转的 URL 路径
+    Success(StatusCode, String),
     Error(StatusCode),
 }
 
-impl<T> IntoResponse for StatusHeaderResponse<T>
-where
-    T: IntoResponse,
-{
+impl IntoResponse for StatusHeaderResponse {
     fn into_response(self) -> Response {
         match self {
-            StatusHeaderResponse::Success(status, response) => (status, response).into_response(),
+            StatusHeaderResponse::Success(status, location_path) => {
+                let headers = [(header::LOCATION, location_path)];
+                (status, headers, ()).into_response()
+            }
             StatusHeaderResponse::Error(status) => status.into_response(),
         }
     }
