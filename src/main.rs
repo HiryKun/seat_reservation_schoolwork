@@ -1,10 +1,14 @@
 use axum::{
-    Router, middleware,
+    Router,
     http::{Method, header},
+    middleware,
     routing::{get, post},
 };
 use sqlx::MySqlPool;
-use tower_http::{trace::TraceLayer, cors::{CorsLayer, Any}};
+use tower_http::{
+    cors::{Any, CorsLayer},
+    trace::TraceLayer,
+};
 use tracing::info;
 mod handlers;
 mod my_middleware;

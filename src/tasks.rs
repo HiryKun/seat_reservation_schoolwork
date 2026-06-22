@@ -1,6 +1,6 @@
-use sqlx::{MySqlPool, Transaction, MySql};
-use tokio::time::{interval, Duration};
-use chrono::{Local, Duration as ChronoDuration};
+use chrono::{Duration as ChronoDuration, Local};
+use sqlx::{MySql, MySqlPool, Transaction};
+use tokio::time::{Duration, interval};
 use tracing::{info, warn};
 
 const PENALTY_SCORE: i32 = 10;
@@ -39,7 +39,8 @@ pub async fn start_deadline_checker(pool: MySqlPool) {
             WHERE status IN ('PENDING', 'ACTIVE', 'SUSPENDED') 
               AND next_deadline < ?
             "#,
-            current_time, current_time
+            current_time,
+            current_time
         )
         .execute(&mut *tx)
         .await;
@@ -132,7 +133,8 @@ pub async fn start_database_cleaner(pool: MySqlPool) {
             border_date
         )
         .execute(&pool)
-        .await {
+        .await
+        {
             Ok(result) => {
                 if result.rows_affected() > 0 {
                     info!("[定时任务] 清除了 {} 个过期记录", result.rows_affected());
