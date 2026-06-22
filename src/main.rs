@@ -1,9 +1,10 @@
 use axum::{
     Router, middleware,
+    http::{Method, header},
     routing::{get, post},
 };
 use sqlx::MySqlPool;
-use tower_http::trace::TraceLayer;
+use tower_http::{trace::TraceLayer, cors::{CorsLayer, Any}};
 use tracing::info;
 mod handlers;
 mod my_middleware;
@@ -75,11 +76,24 @@ async fn main() {
         ))
         .with_state(pool.clone());
 
+    /* CORS 跨域配置：前端 IP 不固定，放行所有源；按需求限定方法与请求头 */
+    let cors = CorsLayer::new()
+        .allow_origin(Any)
+        .allow_methods([
+            Method::GET,
+            Method::POST,
+            Method::OPTIONS,
+            Method::PUT,
+            Method::DELETE,
+        ])
+        .allow_headers([header::CONTENT_TYPE, header::AUTHORIZATION]);
+
     /* 主路由 */
     let app = Router::new()
         .route("/auth/login", post(users::login))
         .merge(protected)
         .layer(TraceLayer::new_for_http())
+        .layer(cors)
         .with_state(pool.clone());
 
     /* 启动服务 */
